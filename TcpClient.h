@@ -13,7 +13,10 @@ class TcpClient : public QObject
 {
 
 public:
-    explicit TcpClient(QObject *parent = nullptr);
+    explicit TcpClient( QString serverAddress = "",
+                        int serverPort = 0,
+                        int monitoringRate = 0,
+                        QObject *parent = nullptr);
     ~TcpClient();
 
     void sendCpuTemperature();
@@ -26,10 +29,10 @@ private:
 private:
     QTcpSocket*     m_tcpSocket;
     QHostAddress    m_hostAddress;
-    quint16         m_port { 0 };
+    quint16         m_port;
 
     QTimer*         m_temperatureReadingTimer;
-    int             m_temperatureReadingRate { 1000 };
+    int             m_temperatureReadingRate;
 
     WindowsHardwareInfo m_windowsHardwareInfo;
 };

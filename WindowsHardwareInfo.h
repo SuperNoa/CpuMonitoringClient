@@ -23,13 +23,13 @@ public:
     // Copy assignment (Do deep copy)
     WindowsHardwareInfo& operator=(const WindowsHardwareInfo& windowsHardwareInfo) = delete;
 
-    double getCpuTemperature();
+    int getCpuTemperature();
 
 private:
 
     bool init();
 
-    bool queryOnBoardCpuInfo(HRESULT hres, IWbemServices *pSvc, QString& infoToReturn) const;
+    bool queryOnBoardCpuInfo(HRESULT hres, IWbemServices *pSvc, int& infoToReturn) const;
 
 private:
     HRESULT         m_hres;

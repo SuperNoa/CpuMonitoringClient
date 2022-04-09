@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QCommandLineParser>
 
 #include "TcpClient.h"
 
@@ -13,9 +14,54 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QCoreApplication app(argc, argv);
+    QCoreApplication::setApplicationName("CPU load monitor client");
+    QCoreApplication::setApplicationVersion("1.0");
 
-    TcpClient tcpClient;
+    QCommandLineParser parser;
+    parser.setApplicationDescription("A client application to monitor the CPU load");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("rate",    QCoreApplication::translate("main", "Monitoring rate in ms."));
+    parser.addPositionalArgument("address", QCoreApplication::translate("main", "Server address."));
+    parser.addPositionalArgument("port",    QCoreApplication::translate("main", "Server port."));
 
-    return a.exec();
+    QCommandLineOption monitoringRateOption("rate",     QCoreApplication::translate("main", "Monitoring rate in ms."), "1000");
+    parser.addOption(monitoringRateOption);
+
+    QCommandLineOption serverAddressOption("address",   QCoreApplication::translate("main", "Server address."), "127.0.01");
+    parser.addOption(serverAddressOption);
+
+    QCommandLineOption serverPortOption("port",         QCoreApplication::translate("main", "Server port."), "5000");
+    parser.addOption(serverPortOption);
+
+    parser.process(app);
+
+    bool monitoringRateSet  = parser.isSet(monitoringRateOption);
+    bool serverAddressSet   = parser.isSet(serverAddressOption);
+    bool serverPortSet      = parser.isSet(serverPortOption);
+
+    int monitoringRate      { 250 };
+    QString serverAddress   { "127.0.0.1" };
+    int serverPort          { 5000 };
+
+    monitoringRate          = parser.value(monitoringRateOption).toInt();
+    serverAddress           = parser.value(serverAddressOption);
+    serverPort              = parser.value(serverPortOption).toInt();
+
+    qDebug() << ( monitoringRateSet ?
+                      QString("The client will send data to the server each %1").arg(monitoringRate).append(" ms") :
+                      QString("Monitoring rate not specified, the client will send data to the server each ").arg(monitoringRate).append(" ms") );
+
+    qDebug() << ( serverAddressSet ?
+                      QString("The client will connect to the server at the address ").append(serverAddress) :
+                      QString("Server address not specified, the client will use ").append(serverAddress) );
+
+    qDebug() << ( serverPortSet ?
+                      QString("The client will use the port %1 ").arg(serverPort) :
+                      QString("Server port not specified, the client will use %1").arg(serverPort) );
+
+    TcpClient tcpClient { serverAddress, serverPort, monitoringRate };
+
+    return app.exec();
 }

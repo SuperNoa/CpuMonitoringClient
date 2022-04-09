@@ -3,8 +3,14 @@
 #include <QTcpSocket>
 #include <QNetworkInterface>
 
-TcpClient::TcpClient(QObject *parent) :
-    QObject(parent)
+TcpClient::TcpClient(   QString serverAddress,
+                    int serverPort,
+                    int monitoringRate,
+                    QObject *parent) :
+    QObject(parent),
+    m_hostAddress { serverAddress },
+    m_port { static_cast<quint16>(serverPort) },
+    m_temperatureReadingRate { monitoringRate }
 {
     initClient();
 
@@ -22,9 +28,6 @@ void TcpClient::initClient()
 {
     m_tcpSocket                 = new QTcpSocket(this);
     m_temperatureReadingTimer   = new QTimer(this);
-
-    m_hostAddress   = QHostAddress::LocalHost;
-    m_port          = 5000;
 
     connect(m_temperatureReadingTimer, &QTimer::timeout, this, QOverload<>::of(&TcpClient::sendCpuTemperature));
 }
@@ -70,9 +73,9 @@ void TcpClient::sendCpuTemperature()
     // Set the protocol version of QDataStream to Version 20 (Qt 6.0)
     out.setVersion(QDataStream::Qt_6_2);
 
-    QString temperature { "Temperatura corrente: 38°" };
+    int temperature { m_windowsHardwareInfo.getCpuTemperature() };
 
-    m_windowsHardwareInfo.getCpuTemperature();
+    qDebug() << "Client CPU load " << temperature << "%";
 
     // write it to the connecting socket
     out << temperature;

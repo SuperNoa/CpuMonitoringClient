@@ -17,11 +17,13 @@ WindowsHardwareInfo::WindowsHardwareInfo() :
     m_initSucceeded = init();
 }
 
-double WindowsHardwareInfo::getCpuTemperature()
+int WindowsHardwareInfo::getCpuTemperature()
 {
-    QString infoToReturn;
+    int infoToReturn { 0 };
 
     queryOnBoardCpuInfo(m_hres, m_pSvc, infoToReturn);
+
+    return infoToReturn;
 }
 
 WindowsHardwareInfo::~WindowsHardwareInfo()
@@ -197,7 +199,7 @@ bool WindowsHardwareInfo::init()
     return true;
 }
 
-bool WindowsHardwareInfo::queryOnBoardCpuInfo(HRESULT hres, IWbemServices *pSvc, QString& infoToReturn) const
+bool WindowsHardwareInfo::queryOnBoardCpuInfo(HRESULT hres, IWbemServices *pSvc, int& infoToReturn) const
 {
     // Step 6: --------------------------------------------------
     // Use the IWbemServices pointer to make requests of WMI ----
@@ -207,6 +209,8 @@ bool WindowsHardwareInfo::queryOnBoardCpuInfo(HRESULT hres, IWbemServices *pSvc,
     BSTR bstr_wql = SysAllocString(L"WQL");
     BSTR bstr_sql = SysAllocString(L"SELECT * FROM Win32_Processor");
 
+    // https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-provider
+
     hres = pSvc->ExecQuery(
         bstr_wql,
         bstr_sql,
@@ -214,6 +218,8 @@ bool WindowsHardwareInfo::queryOnBoardCpuInfo(HRESULT hres, IWbemServices *pSvc,
         nullptr,
         &pEnumerator);
 
+    SysFreeString(bstr_wql);
+    SysFreeString(bstr_sql);
 
     // Step 7: -------------------------------------------------
     // Get the data from the query in step 6 -------------------
@@ -233,10 +239,11 @@ bool WindowsHardwareInfo::queryOnBoardCpuInfo(HRESULT hres, IWbemServices *pSvc,
         VARIANT vtUUID;
 
         // Get the value of the Name property
-        hr = pclsObj->Get(L"Manufacturer", 0, &vtUUID, nullptr, nullptr);
+        // https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-processor
+        hr = pclsObj->Get(L"LoadPercentage", 0, &vtUUID, nullptr, nullptr);
 
-        // BSTR => wchar_t*
-        infoToReturn = QString::fromWCharArray( vtUUID.bstrVal );
+        // BSTR => uint16
+        infoToReturn = vtUUID.intVal;
 
         VariantClear(&vtUUID);
 
