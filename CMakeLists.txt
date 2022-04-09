@@ -18,5 +18,19 @@ add_executable(CpuMonitoringClient
   main.cpp
   TcpClient.h
   TcpClient.cpp
+  WindowsHardwareInfo.h
+  WindowsHardwareInfo.cpp
 )
 target_link_libraries(CpuMonitoringClient Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
+
+# Dependencies
+# System Libraries
+if (WIN32)
+    target_link_libraries(CpuMonitoringClient "WbemUuid.lib" "Ole32" "credui" ) # "comsuppw" )
+endif ()
+
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Zc:strictStrings")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXXFLAGS} -Zc:strictStrings")
+
+#message(CMAKE_C_FLAGS=${CMAKE_C_FLAGS})
+#message(CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS})

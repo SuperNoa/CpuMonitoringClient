@@ -72,6 +72,8 @@ void TcpClient::sendCpuTemperature()
 
     QString temperature { "Temperatura corrente: 38°" };
 
+    m_windowsHardwareInfo.getCpuTemperature();
+
     // write it to the connecting socket
     out << temperature;
 

@@ -5,6 +5,8 @@
 #include <QHostAddress>
 #include <QTimer>
 
+#include "WindowsHardwareInfo.h"
+
 class QTcpSocket;
 
 class TcpClient : public QObject
@@ -28,6 +30,8 @@ private:
 
     QTimer*         m_temperatureReadingTimer;
     int             m_temperatureReadingRate { 1000 };
+
+    WindowsHardwareInfo m_windowsHardwareInfo;
 };
 
 #endif // TCPCLIENT_H
