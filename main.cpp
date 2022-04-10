@@ -41,13 +41,24 @@ int main(int argc, char *argv[])
     bool serverAddressSet   = parser.isSet(serverAddressOption);
     bool serverPortSet      = parser.isSet(serverPortOption);
 
-    int monitoringRate      { 250 };
-    QString serverAddress   { "127.0.0.1" };
-    int serverPort          { 5000 };
+    int monitoringRate      { parser.value(monitoringRateOption).toInt() };
+    QString serverAddress   { parser.value(serverAddressOption) };
+    int serverPort          { parser.value(serverPortOption).toInt() };
 
-    monitoringRate          = parser.value(monitoringRateOption).toInt();
-    serverAddress           = parser.value(serverAddressOption);
-    serverPort              = parser.value(serverPortOption).toInt();
+    if( !monitoringRateSet )
+    {
+        monitoringRate = 125;
+    }
+
+    if( !serverAddressSet )
+    {
+        serverAddress = "127.0.0.1";
+    }
+
+    if( !serverPortSet )
+    {
+        serverPort = 5000;
+    }
 
     qDebug() << ( monitoringRateSet ?
                       QString("The client will send data to the server each %1").arg(monitoringRate).append(" ms") :
